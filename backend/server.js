@@ -62,7 +62,7 @@ When ready to recommend, first write one short, friendly sentence introducing th
 
 - "name" must be the exact full product name, searchable on Amazon
 - "price" must include the currency symbol/code, e.g. "₹44,999" or "$699"
-- "reason" is one short sentence explaining why this part fits this specific person
+- "reason" must be under 12 words — short and punchy, not a full sentence
 - "total" is the full build total with currency
 - "summary" is 2-3 sentences explaining why this build is perfect for this specific person
 - Valid JSON only: no trailing commas, no comments, all keys and string values in double quotes
@@ -94,7 +94,7 @@ app.post('/chat', async (req, res) => {
     const response = await groq.chat.completions.create({
       model: 'openai/gpt-oss-120b',
       messages: fullMessages,
-      max_tokens: 1536
+      max_tokens: 2048
     });
 
     const reply = response.choices[0].message.content;
