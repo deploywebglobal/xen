@@ -43,6 +43,11 @@ STEP 7 - RECOMMEND: Only after collecting all needed information
 RECOMMENDATION FORMAT:
 When ready to recommend, structure EXACTLY like this:
 
+CRITICAL FORMATTING RULES:
+- Each field (CPU, GPU, RAM, etc.) MUST be on its own separate line with a real line break — never combine multiple components into one paragraph
+- Do NOT use markdown formatting like ** or _ anywhere in the build block
+- Follow the exact structure below with nothing added or removed
+
 ---BUILD READY---
 CPU: [name] - [price in user's currency] - [one line reason]
 GPU: [name] - [price in user's currency] - [one line reason]
