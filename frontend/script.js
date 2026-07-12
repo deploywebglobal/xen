@@ -125,7 +125,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const beforeBuild = text.substring(0, buildStart).trim();
     const buildText = text.substring(buildStart + 17, buildEnd).trim();
-    const buildText = text.substring(buildStart + 17, buildEnd).trim()
   .replace(/\*\*/g, '')                    // strip markdown bold
   .replace(/(CPU|GPU|RAM|MOTHERBOARD|STORAGE|PSU|CASE|TOTAL|SUMMARY):/g, '\n$1:'); // force line breaks before each field
     const afterBuild = text.substring(buildEnd + 15).trim();
