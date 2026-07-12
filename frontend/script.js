@@ -124,9 +124,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const buildEnd = text.indexOf('---END BUILD---');
 
     const beforeBuild = text.substring(0, buildStart).trim();
-    const buildText = text.substring(buildStart + 17, buildEnd).trim();
-  .replace(/\*\*/g, '')                    // strip markdown bold
-  .replace(/(CPU|GPU|RAM|MOTHERBOARD|STORAGE|PSU|CASE|TOTAL|SUMMARY):/g, '\n$1:'); // force line breaks before each field
+    const buildText = text.substring(buildStart + 17, buildEnd).trim()
+  .replace(/\*\*/g, '')
+  .replace(/(CPU|GPU|RAM|MOTHERBOARD|STORAGE|PSU|CASE|TOTAL|SUMMARY):/g, '\n$1:');
     const afterBuild = text.substring(buildEnd + 15).trim();
 
     if (beforeBuild) {
