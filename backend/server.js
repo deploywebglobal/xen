@@ -4,10 +4,13 @@ require('dotenv').config();
 const Groq = require('groq-sdk');
 
 const app = express();
-/*  app.use(cors());  */
-app.use(express.json());
+
+// Only allow requests from your deployed frontend (set FRONTEND_ORIGIN in Render's
+// environment variables, e.g. https://ai-xen.pages.dev). Falls back to allow-all
+// in local dev if unset.
 const allowedOrigin = process.env.FRONTEND_ORIGIN;
 app.use(cors(allowedOrigin ? { origin: allowedOrigin } : {}));
+app.use(express.json());
 
 const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY
@@ -17,7 +20,7 @@ const SYSTEM_PROMPT = `You are XEN, an expert PC building assistant by XENRON.AI
 
 LANGUAGE AND CURRENCY RULES:
 - Detect the currency the user mentions and use it throughout the entire conversation
-- If user says "rupees", "rupees", "INR", "₹", or "lakh" — use Indian Rupees (₹) for all prices
+- If user says "rupees", "INR", "₹", or "lakh" — use Indian Rupees (₹) for all prices
 - If user says "dollars", "USD", or "$" — use USD for all prices
 - If user mentions a budget in lakhs — understand it correctly (1 lakh = 100,000 rupees)
 - If no currency is mentioned, ask which currency they prefer before continuing
@@ -40,25 +43,29 @@ STEP 5 - PREFERENCES: Ask brand preferences (Intel/AMD, NVIDIA/AMD)
 STEP 6 - EXISTING PARTS: Ask if they own any parts already
 STEP 7 - RECOMMEND: Only after collecting all needed information
 
-RECOMMENDATION FORMAT:
-When ready to recommend, structure EXACTLY like this:
+RECOMMENDATION FORMAT (this is the ONLY format to use — do not use any other structure):
+When ready to recommend, first write one short, friendly sentence introducing the build. Then output ONLY a fenced JSON code block — nothing else inside the fence, no markdown bold, no extra commentary before or after the fence besides your one-sentence intro. Follow this exact schema with nothing added or removed:
 
-CRITICAL FORMATTING RULES:
-- Each field (CPU, GPU, RAM, etc.) MUST be on its own separate line with a real line break — never combine multiple components into one paragraph
-- Do NOT use markdown formatting like ** or _ anywhere in the build block
-- Follow the exact structure below with nothing added or removed
+\`\`\`json
+{
+  "cpu": {"name": "", "price": "", "reason": ""},
+  "gpu": {"name": "", "price": "", "reason": ""},
+  "ram": {"name": "", "price": "", "reason": ""},
+  "motherboard": {"name": "", "price": "", "reason": ""},
+  "storage": {"name": "", "price": "", "reason": ""},
+  "psu": {"name": "", "price": "", "reason": ""},
+  "case": {"name": "", "price": "", "reason": ""},
+  "total": "",
+  "summary": ""
+}
+\`\`\`
 
----BUILD READY---
-CPU: [name] - [price in user's currency] - [one line reason]
-GPU: [name] - [price in user's currency] - [one line reason]
-RAM: [name] - [price in user's currency] - [one line reason]
-MOTHERBOARD: [name] - [price in user's currency] - [one line reason]
-STORAGE: [name] - [price in user's currency] - [one line reason]
-PSU: [name] - [price in user's currency] - [one line reason]
-CASE: [name] - [price in user's currency] - [one line reason]
-TOTAL: [total in user's currency]
-SUMMARY: [2-3 sentences explaining why this build is perfect for this specific person]
----END BUILD---
+- "name" must be the exact full product name, searchable on Amazon
+- "price" must include the currency symbol/code, e.g. "₹44,999" or "$699"
+- "reason" is one short sentence explaining why this part fits this specific person
+- "total" is the full build total with currency
+- "summary" is 2-3 sentences explaining why this build is perfect for this specific person
+- Valid JSON only: no trailing commas, no comments, all keys and string values in double quotes
 
 IMPORTANT RULES:
 - Ask only ONE question at a time
@@ -67,10 +74,13 @@ IMPORTANT RULES:
 - Never recommend before completing all relevant steps
 - Always stay within the user's budget
 - If budget is too low for their needs, gently say so and suggest a realistic minimum
-- Always use exact full product names searchable on Amazon
 - Vary your language every message — never start two messages the same way
 - Add personality — you are a knowledgeable friend who loves PC building
 - Use the user's name if they told you it`;
+
+app.get('/', (req, res) => {
+  res.send('XENRON.AI backend is running.');
+});
 
 app.post('/chat', async (req, res) => {
   try {
@@ -84,7 +94,7 @@ app.post('/chat', async (req, res) => {
     const response = await groq.chat.completions.create({
       model: 'openai/gpt-oss-120b',
       messages: fullMessages,
-      max_tokens: 1024
+      max_tokens: 1536
     });
 
     const reply = response.choices[0].message.content;
@@ -100,8 +110,3 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`PC Builder server running on port ${PORT}`);
 });
-
-/*
-app.listen(3000, () => {
-  console.log('PC Builder server running on http://localhost:3000');
-}); */
